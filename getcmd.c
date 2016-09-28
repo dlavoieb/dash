@@ -9,7 +9,7 @@
 
 //
 // This code is given for illustration purposes. You need not include or follow this
-// strictly. Feel free to writer better or bug free code. This example code block does not
+// strictly. Feel free to write better or bug free code. This example code block does not
 // worry about deallocating memory. You need to ensure memory is allocated and deallocated
 // properly so that your shell works without leaking memory.
 //
@@ -39,5 +39,6 @@ int getcmd(char *prompt, char *args[], int *background)
         if (strlen(token) > 0)
             args[i++] = token;
     }
+    free(line);
     return i;
 }
