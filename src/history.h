@@ -16,5 +16,6 @@ struct Node {
 int initHistory();
 int addCmd(char **cmd, int length);
 int printHistory(int length);
+int printEntry(int index);
 int exitHistory();
 #endif //DASH_HISTORY_H

@@ -21,7 +21,12 @@ int main(void)
             if (depth == 0) depth = 10;
             printHistory(depth);
         }
-
+        if (strcmp("!", args[0]) == 0) {
+            // check for the history command
+            int depth = (int) strtol(args[1], NULL, 10);
+            if (depth == 0) depth = 10;
+            printEntry(depth);
+        }
         addCmd(args, cnt);
 
         /* the steps can be..:

@@ -86,3 +86,28 @@ int exitHistory() {
     tail = current;
     return 0;
 }
+
+int printEntry(int index) {
+    struct Node* current = tail;
+
+    if (index > current->seq)
+        printf("no command found in history\n");
+
+    else
+        while (current != NULL)
+        {
+            if (current->seq == index)
+            {
+                printf("%d: ", current->seq);
+                int j;
+                for (j = 0; j < current->cmd_length; j++)
+                {
+                    printf("%s ", current->cmd[j]);
+                }
+                printf("\n");
+                return 0;
+            }
+            current = current->prev;
+        }
+    return 1;
+}
