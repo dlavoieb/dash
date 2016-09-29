@@ -8,7 +8,7 @@ int main(void)
 {
     char *args[20];
     int bg;
-    initHistory(NULL);
+    initHistory();
     while(1) {
         bg = 0;
         int cnt = getcmd(">>", args, &bg);

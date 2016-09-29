@@ -13,7 +13,7 @@ struct Node {
 };
 
 
-int initHistory(struct Node *historyTail);
+int initHistory();
 int addCmd(char **cmd, int length);
 int printHistory(int length);
 int exitHistory();

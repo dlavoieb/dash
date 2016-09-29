@@ -9,7 +9,7 @@
 
 struct Node *tail;
 
-int initHistory(struct Node *historyTail) {
+int initHistory() {
     tail = NULL;
     // possibly load the history from a persistence file
     return 0;
