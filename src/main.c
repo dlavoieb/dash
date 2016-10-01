@@ -1,8 +1,9 @@
-#include "getcmd.h"
-#include <stdio.h>
-#include <string.h>
+
 #include <stdlib.h>
+#include <stdio.h>
 #include "history.h"
+#include "parsecmd.h"
+#include "getcmd.h"
 
 int main(void)
 {
@@ -12,30 +13,22 @@ int main(void)
     while(1) {
         bg = 0;
         int cnt = getcmd(">>", args, &bg);
-        if (cnt < 1) continue;
-
-        if (strcmp("exit", args[0]) == 0) break; // check for the exit command
-        if (strcmp("history", args[0]) == 0) {
-            // check for the history command
-            int depth = (int) strtol(args[1], NULL, 10);
-            if (depth == 0) depth = 10;
-            printHistory(depth);
-        }
-        if (strcmp("!", args[0]) == 0) {
-            // check for the history command
-            int depth = (int) strtol(args[1], NULL, 10);
-            if (depth == 0) depth = 10;
-            printEntry(depth);
-        }
+        int ret = parseCommandLine(args, cnt, bg);
         addCmd(args, cnt);
 
-        /* the steps can be..:
-         * (1) fork a child process using fork()
-         * (2) the child process will invoke execvp()
-         * (3) if background is not specified, the parent will wait,
-         * otherwise parent starts the next command...
-         */
+        if (ret == 0)
+            // all good status
+            continue;
 
+        else if (ret == 1)
+        {
+            printf("Last Command Unsuccessfull\n");
+            // error in the last command
+            continue;
+        }
+        else if (ret == 255)
+            // exit code
+            break;
     }
     exitHistory();
     exit(0);

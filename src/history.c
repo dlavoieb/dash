@@ -7,7 +7,7 @@
 #include <string.h>
 #include "history.h"
 
-struct Node *tail;
+struct ProcessNode *tail;
 
 int initHistory() {
     tail = NULL;
@@ -16,7 +16,7 @@ int initHistory() {
 }
 
 int addCmd(char **cmd, int length) {
-    struct Node* newNode = malloc(sizeof(struct Node));
+    struct ProcessNode* newNode = malloc(sizeof(struct ProcessNode));
 
     newNode->prev = tail;
     if (newNode->prev != NULL) {
@@ -30,7 +30,6 @@ int addCmd(char **cmd, int length) {
     int i;
     for (i = 0; i < length; i++)
     {
-        printf("%d",i);
         newNode->cmd[i] = malloc(sizeof(char*));
         strcpy(newNode->cmd[i], cmd[i]);
     }
@@ -47,7 +46,7 @@ int addCmd(char **cmd, int length) {
  */
 int printHistory(int length) {
     int dist;
-    struct Node* current = tail;
+    struct ProcessNode* current = tail;
     for(dist = 0; dist < length; dist++) {
         if (current != NULL) {
             printf("%d: ", current->seq);
@@ -70,7 +69,7 @@ int printHistory(int length) {
 int exitHistory() {
     // possibly save the history to some persistence file
     // todo: free the command history memory
-    struct Node* current = tail;
+    struct ProcessNode* current = tail;
     while (current != NULL)
     {
         int i;
@@ -79,7 +78,7 @@ int exitHistory() {
             free(current->cmd[i]);
         }
         free(current->cmd);
-        struct Node* temp = current;
+        struct ProcessNode* temp = current;
         current = current->prev;
         free(temp);
     }
@@ -88,7 +87,7 @@ int exitHistory() {
 }
 
 int printEntry(int index) {
-    struct Node* current = tail;
+    struct ProcessNode* current = tail;
 
     if (index > current->seq)
         printf("no command found in history\n");
@@ -110,4 +109,17 @@ int printEntry(int index) {
             current = current->prev;
         }
     return 1;
+}
+
+int history(char **token, int cnt) {
+    // check for the history command
+    int depth = (int) strtol(token[1], NULL, 10);
+    if (cnt == 1 || depth == 0) depth = 10;
+    return printHistory(depth);
+}
+
+int historyEntry(char **token) {
+    // check for the history command
+    int index = (int) strtol(token[0] + sizeof(char), NULL, 10);
+    return printEntry(index);
 }
