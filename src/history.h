@@ -5,11 +5,11 @@
 #ifndef DASH_HISTORY_H
 #define DASH_HISTORY_H
 
-struct ProcessNode {
+struct HistoryNode {
     int seq;
     int cmd_length;
     char** cmd;
-    struct ProcessNode* prev;
+    struct HistoryNode* prev;
 };
 
 

@@ -7,7 +7,7 @@
 #include <string.h>
 #include "history.h"
 
-struct ProcessNode *tail;
+struct HistoryNode *tail;
 
 int initHistory() {
     tail = NULL;
@@ -16,7 +16,7 @@ int initHistory() {
 }
 
 int addCmd(char **cmd, int length) {
-    struct ProcessNode* newNode = malloc(sizeof(struct ProcessNode));
+    struct HistoryNode* newNode = malloc(sizeof(struct HistoryNode));
 
     newNode->prev = tail;
     if (newNode->prev != NULL) {
@@ -46,7 +46,7 @@ int addCmd(char **cmd, int length) {
  */
 int printHistory(int length) {
     int dist;
-    struct ProcessNode* current = tail;
+    struct HistoryNode* current = tail;
     for(dist = 0; dist < length; dist++) {
         if (current != NULL) {
             printf("%d: ", current->seq);
@@ -69,7 +69,7 @@ int printHistory(int length) {
 int exitHistory() {
     // possibly save the history to some persistence file
     // todo: free the command history memory
-    struct ProcessNode* current = tail;
+    struct HistoryNode* current = tail;
     while (current != NULL)
     {
         int i;
@@ -78,7 +78,7 @@ int exitHistory() {
             free(current->cmd[i]);
         }
         free(current->cmd);
-        struct ProcessNode* temp = current;
+        struct HistoryNode* temp = current;
         current = current->prev;
         free(temp);
     }
@@ -87,7 +87,7 @@ int exitHistory() {
 }
 
 int printEntry(int index) {
-    struct ProcessNode* current = tail;
+    struct HistoryNode* current = tail;
 
     if (index > current->seq)
         printf("no command found in history\n");
