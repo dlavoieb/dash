@@ -22,7 +22,7 @@ int main(void)
 
         else if (ret == 1)
         {
-            printf("Last Command Unsuccessfull\n");
+            printf("last exit unclean\n");
             // error in the last command
             continue;
         }

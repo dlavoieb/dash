@@ -113,7 +113,8 @@ int printEntry(int index) {
 
 int history(char **token, int cnt) {
     // check for the history command
-    int depth = (int) strtol(token[1], NULL, 10);
+    int depth = 0;
+    if (cnt > 1) depth = (int) strtol(token[1], NULL, 10);
     if (cnt == 1 || depth == 0) depth = 10;
     return printHistory(depth);
 }

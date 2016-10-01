@@ -54,6 +54,8 @@ int otherProcess(char **tokens, int count, int bg) {
     {
         // child process
         execvp(tokens[0], tokens);
+        perror("exec command failed");
+        exit(1);
     }
 
 
