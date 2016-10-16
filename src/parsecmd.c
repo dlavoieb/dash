@@ -11,6 +11,10 @@
 #include "dircmds.h"
 #include "history.h"
 
+
+struct ProcessNode * activePid = NULL;
+struct ProcessNode * lastActivePid = NULL;
+
 int parseCommandLine(char **tokens, int count, int bg) {
     if (count < 1) return 0;
 
@@ -47,6 +51,8 @@ int parseCommandLine(char **tokens, int count, int bg) {
 
     else if (strcmp("cd", tokens[0]) == 0) status = cd(tokens, count);
 
+    else if (strcmp("jobs", tokens[0]) == 0) status = jobs();
+
     else status = otherProcess(tokens, position, bg);
 
     // restore stdout
@@ -56,6 +62,17 @@ int parseCommandLine(char **tokens, int count, int bg) {
 
     return status;
 
+}
+
+int jobs() {
+    struct ProcessNode * node = activePid;
+    printf("Background processes: \n");
+    while (node != NULL)
+    {
+        printf("\t%d\n", node->pid);
+        node = node->next;
+    }
+    return 0;
 }
 
 int otherProcess(char **tokens, int count, int bg) {
@@ -70,11 +87,21 @@ int otherProcess(char **tokens, int count, int bg) {
         // parent process
         if (bg == 0)
         {
-            // not in background, redirect output and wait before returning
+            // not in background, wait before returning
             waitpid(child_pid, NULL, 0);
         }
         else
         {
+            // add command to pid list
+            struct ProcessNode *currentNode = malloc(sizeof(struct ProcessNode));
+            if (activePid == NULL) {
+                activePid = currentNode;
+            } else{
+                lastActivePid->next = currentNode;
+            }
+            currentNode->pid   = child_pid;
+            currentNode->next = NULL;
+            lastActivePid = currentNode;
         }
     }
 

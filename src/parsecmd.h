@@ -13,11 +13,11 @@ struct ProcessNode
     struct ProcessNode * next;
 };
 
-struct ProcessNode * activePid;
-
 int parseCommandLine(char ** tokens, int count, int bg);
 
 int otherProcess(char ** tokens, int count, int bg);
+
+int jobs();
 
 int findRedirect(char **tokens, int count, char *output, int *position);
 
