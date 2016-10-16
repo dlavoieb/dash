@@ -19,4 +19,6 @@ int parseCommandLine(char ** tokens, int count, int bg);
 
 int otherProcess(char ** tokens, int count, int bg);
 
+int findRedirect(char **tokens, int count, char *output, int *position);
+
 #endif //DASH_PARSECMD_H

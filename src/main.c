@@ -13,8 +13,8 @@ int main(void)
     while(1) {
         bg = 0;
         int cnt = getcmd(">>", args, &bg);
-        int ret = parseCommandLine(args, cnt, bg);
         addCmd(args, cnt);
+        int ret = parseCommandLine(args, cnt, bg);
 
         if (ret == 0)
             // all good status
