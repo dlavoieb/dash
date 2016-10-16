@@ -90,7 +90,6 @@ int jobs() {
     struct ProcessNode * node = activePid;
     struct ProcessNode * previousNode = NULL;
     printf("Background processes: \n");
-    int i = 0;
     while (node != NULL)
     {
         // check if current node still active
@@ -105,7 +104,7 @@ int jobs() {
         }
         else
         {
-            printf("\t%d: %d\n",i++, node->pid);
+            printf("\t%d\n", node->pid);
             previousNode = node;
             node = node->next;
         }
