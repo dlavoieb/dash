@@ -14,6 +14,7 @@
 struct ProcessNode * activePid = NULL;
 struct ProcessNode * lastActivePid = NULL;
 
+
 int parseCommandLine(char **tokens, int count, int bg) {
     if (count < 1) return 0;
 
@@ -52,6 +53,8 @@ int parseCommandLine(char **tokens, int count, int bg) {
 
     else if (strcmp("jobs", tokens[0]) == 0) status = jobs();
 
+    else if (strcmp("fg", tokens[0]) == 0) status = fg(tokens, count);
+
     else status = otherProcess(tokens, position, bg);
 
     // restore stdout
@@ -63,10 +66,31 @@ int parseCommandLine(char **tokens, int count, int bg) {
 
 }
 
+int fg(char **tokens, int count) {
+    int index = 0;
+    struct ProcessNode* node = activePid;
+    if (count > 1) index = (int) strtol(tokens[1], NULL, 10);
+    if (count == 1 || index == 0) node = lastActivePid;
+    else{
+        int i;
+        for (i = 0; i < index; i++)
+        {
+            if (node != NULL)
+                node = node->next;
+        }
+
+    }
+    if (node != NULL)
+        waitpid(node->pid, NULL, 0);
+
+    return 0;
+}
+
 int jobs() {
     struct ProcessNode * node = activePid;
     struct ProcessNode * previousNode = NULL;
     printf("Background processes: \n");
+    int i = 0;
     while (node != NULL)
     {
         // check if current node still active
@@ -81,7 +105,7 @@ int jobs() {
         }
         else
         {
-            printf("\t%d\n", node->pid);
+            printf("\t%d: %d\n",i++, node->pid);
             previousNode = node;
             node = node->next;
         }

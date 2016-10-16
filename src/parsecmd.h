@@ -19,6 +19,8 @@ int otherProcess(char ** tokens, int count, int bg);
 
 int jobs();
 
+int fg(char **tokens, int count);
+
 int findRedirect(char **tokens, int count, char *output, int *position);
 
 #endif //DASH_PARSECMD_H
