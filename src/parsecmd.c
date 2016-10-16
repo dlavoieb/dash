@@ -11,7 +11,6 @@
 #include "dircmds.h"
 #include "history.h"
 
-
 struct ProcessNode * activePid = NULL;
 struct ProcessNode * lastActivePid = NULL;
 
@@ -66,11 +65,26 @@ int parseCommandLine(char **tokens, int count, int bg) {
 
 int jobs() {
     struct ProcessNode * node = activePid;
+    struct ProcessNode * previousNode = NULL;
     printf("Background processes: \n");
     while (node != NULL)
     {
-        printf("\t%d\n", node->pid);
-        node = node->next;
+        // check if current node still active
+        int status;
+        waitpid(node->pid, &status, WNOHANG);
+        if (WIFEXITED(status))
+        {
+            if (previousNode!=NULL)
+                previousNode->next = node->next;
+            node = node->next;
+            free(node);
+        }
+        else
+        {
+            printf("\t%d\n", node->pid);
+            previousNode = node;
+            node = node->next;
+        }
     }
     return 0;
 }
@@ -94,9 +108,12 @@ int otherProcess(char **tokens, int count, int bg) {
         {
             // add command to pid list
             struct ProcessNode *currentNode = malloc(sizeof(struct ProcessNode));
-            if (activePid == NULL) {
+            if (activePid == NULL)
+            {
                 activePid = currentNode;
-            } else{
+            }
+            else
+            {
                 lastActivePid->next = currentNode;
             }
             currentNode->pid   = child_pid;
