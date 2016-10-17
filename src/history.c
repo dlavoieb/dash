@@ -68,7 +68,6 @@ int printHistory(int length) {
 
 int exitHistory() {
     // possibly save the history to some persistence file
-    // todo: free the command history memory
     struct HistoryNode* current = tail;
     while (current != NULL)
     {

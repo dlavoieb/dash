@@ -165,6 +165,7 @@ int findRedirect(char **tokens, int count, char *output, int *position) {
         if (strcmp(tokens[i], ">") == 0)
         {
 //            Found redirect string
+//            Put output file in pointer
             if ((i+1) < count) {
                 free(output);
                 output = malloc(sizeof(char) * strlen(tokens[i + 1]));
