@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include "dircmds.h"
-#include "history.h"
 
 struct ProcessNode * activePid = NULL;
 struct ProcessNode * lastActivePid = NULL;
@@ -21,12 +20,14 @@ int parseCommandLine(char **tokens, int count, int bg) {
     char * output = malloc(sizeof(char *));
     int std_out = dup(1);
     int position = count;
+    int append = 0;
 
 
-    if (findRedirect(tokens, count, output, &position))
+    if (findRedirect(tokens, count, output, &position, &append))
     {
+        int file_flags = append ? O_WRONLY | O_APPEND | O_CREAT : O_WRONLY | O_CREAT | O_TRUNC;
         close(1);
-        int opened = open(output, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+        int opened = open(output, file_flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
         if (opened < 0)
         {
             //error opening descriptor
@@ -41,11 +42,7 @@ int parseCommandLine(char **tokens, int count, int bg) {
     // check for built-in command
     int status;
 
-    if (strcmp("exit", tokens[0]) == 0)     status = 255; // exit command quits the shell
-
-    else if (strcmp("history", tokens[0]) == 0)  status = history(tokens, count); // standard history command
-
-    else if (tokens[0][0] == '!') status = historyEntry(tokens); // single history entry with !
+    if (strcmp("exit", tokens[0]) == 0) status = 255; // exit command quits the shell
 
     else if (strcmp("pwd", tokens[0]) == 0) status = pwd();
 
@@ -62,6 +59,7 @@ int parseCommandLine(char **tokens, int count, int bg) {
     dup(std_out);
     close(std_out);
 
+    free(output);
     return status;
 
 }
@@ -142,6 +140,8 @@ int otherProcess(char **tokens, int count, int bg) {
             currentNode->pid   = child_pid;
             currentNode->next = NULL;
             lastActivePid = currentNode;
+
+            free(currentNode);
         }
     }
 
@@ -157,18 +157,19 @@ int otherProcess(char **tokens, int count, int bg) {
     return 0;
 }
 
-int findRedirect(char **tokens, int count, char *output, int *position) {
+int findRedirect(char **tokens, int count, char *output, int *position, int *append) {
     int i;
 
     for (i = 0; i < count; i++)
     {
-        if (strcmp(tokens[i], ">") == 0)
+        if (strcmp(tokens[i], ">") == 0 || strcmp(tokens[i], ">>") == 0)
         {
+            (*append) = strcmp(tokens[i], ">>") == 0;
 //            Found redirect string
-//            Put output file in pointer
+//            Put output file name in pointer
             if ((i+1) < count) {
-                free(output);
-                output = malloc(sizeof(char) * strlen(tokens[i + 1]));
+//                free(output);
+//                output = malloc(sizeof(char) * strlen(tokens[i + 1]));
                 strcpy(output, tokens[i + 1]);
                 (*position) = i;
                 return 1;
