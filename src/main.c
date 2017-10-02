@@ -1,11 +1,32 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
+#include <time.h>
 #include "parsecmd.h"
 #include "getcmd.h"
 
+
+static void sigint_handler (int signal)
+{
+    // forward signal to running process
+//    printf("\b\bSIGINT\n");
+    stop_active_process();
+}
+
+static void sigtstp_handler (int signal)
+{
+//printf("\b\bHA! This signal is ignored, sucker! \n");
+}
+
 int main(void)
 {
+    signal(SIGINT, sigint_handler);
+    signal(SIGTSTP, sigtstp_handler);
+
+    time_t now;
+    srand((unsigned int) (time(&now)));
+
     char *args[20];
     int bg;
     while(1) {
@@ -28,5 +49,6 @@ int main(void)
             break;
     }
 
+    free_nodes();
     exit(0);
 }

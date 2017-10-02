@@ -1,5 +1,5 @@
 //
-// Created by david on 9/26/16.
+// Created by david on 9/26/17.
 //
 
 #include "getcmd.h"
@@ -39,6 +39,7 @@ int getcmd(char *prompt, char *args[], int *background)
         if (strlen(token) > 0)
             args[i++] = token;
     }
+
     free(line);
     return i;
 }

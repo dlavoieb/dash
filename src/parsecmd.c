@@ -1,5 +1,5 @@
 //
-// Created by david on 9/28/16.
+// Created by david on 9/28/17.
 //
 
 #include "parsecmd.h"
@@ -10,9 +10,11 @@
 #include <fcntl.h>
 #include "dircmds.h"
 
-struct ProcessNode * activePid = NULL;
-struct ProcessNode * lastActivePid = NULL;
+static struct ProcessNode * activePid = NULL;
+static struct ProcessNode * lastActivePid = NULL;
+pid_t runningProcess = 0;
 
+void free_node_impl(struct ProcessNode* node);
 
 int parseCommandLine(char **tokens, int count, int bg) {
     if (count < 1) return 0;
@@ -78,34 +80,48 @@ int fg(char **tokens, int count) {
         }
 
     }
+
     if (node != NULL)
-        waitpid(node->pid, NULL, 0);
+    {
+        pid_t pid = node->pid;
+        if (node->previous != NULL)
+        {
+            (node->previous)->next = node->next;
+        }
+        free(node);
+        waitpid(pid, NULL, 0);
+    }
+
 
     return 0;
 }
 
 int jobs() {
     struct ProcessNode * node = activePid;
-    struct ProcessNode * previousNode = NULL;
     printf("Background processes: \n");
     while (node != NULL)
     {
         // check if current node still active
         int status;
         waitpid(node->pid, &status, WNOHANG);
-        if (WIFEXITED(status))
+        if (WIFEXITED(status) || WIFSTOPPED(status))
         {
-            if (previousNode!=NULL)
-                previousNode->next = node->next;
-            node = node->next;
+            if (node->previous!=NULL) {
+                (node->previous)->next = node->next;
+
+            }
+            if (node->next != NULL) {
+                (node->next)->previous = node->previous;
+            }
+
             free(node);
         }
         else
         {
             printf("\t%d\n", node->pid);
-            previousNode = node;
-            node = node->next;
         }
+        node = node->next;
+
     }
     return 0;
 }
@@ -123,7 +139,10 @@ int otherProcess(char **tokens, int count, int bg) {
         if (bg == 0)
         {
             // not in background, wait before returning
+            runningProcess = child_pid;
             waitpid(child_pid, NULL, 0);
+            runningProcess = 0;
+//            printf("Child process has finished\n");
         }
         else
         {
@@ -137,17 +156,27 @@ int otherProcess(char **tokens, int count, int bg) {
             {
                 lastActivePid->next = currentNode;
             }
-            currentNode->pid   = child_pid;
+            currentNode->pid  = child_pid;
             currentNode->next = NULL;
+            currentNode->previous = lastActivePid;
             lastActivePid = currentNode;
 
-            free(currentNode);
+//            free(currentNode);
         }
     }
 
     else
     {
         // child process
+        unsigned int w,rem;
+        w = (unsigned int) (rand() % 10);
+        rem=sleep(w);
+        //handles interruption by signal
+        while(rem!=0)
+        {
+            rem=sleep(rem);
+        }
+
         execvp(tokens[0], tokens);
         perror("exec command failed");
         exit(1);
@@ -164,12 +193,10 @@ int findRedirect(char **tokens, int count, char *output, int *position, int *app
     {
         if (strcmp(tokens[i], ">") == 0 || strcmp(tokens[i], ">>") == 0)
         {
-            (*append) = strcmp(tokens[i], ">>") == 0;
+            (*append) = strcmp(tokens[i], ">>") == 0; // determine if should append or override file
 //            Found redirect string
 //            Put output file name in pointer
             if ((i+1) < count) {
-//                free(output);
-//                output = malloc(sizeof(char) * strlen(tokens[i + 1]));
                 strcpy(output, tokens[i + 1]);
                 (*position) = i;
                 return 1;
@@ -178,4 +205,30 @@ int findRedirect(char **tokens, int count, char *output, int *position, int *app
     }
 
     return 0;
+}
+
+void free_nodes()
+{
+    if (activePid != NULL)
+        free_node_impl(activePid);
+}
+
+void free_node_impl(struct ProcessNode* node)
+{
+    if (node->next != NULL)
+    {
+        free_node_impl(node->next);
+    } else {
+        free(node);
+    }
+}
+
+int stop_active_process()
+{
+    if (runningProcess != 0)
+    {
+        return kill(runningProcess, SIGINT);
+
+    }
+    return -1;
 }
